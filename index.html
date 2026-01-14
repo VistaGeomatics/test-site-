@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Black Theme Scroll Fade Demo</title>
+
+  <style>
+    :root{
+      --fade: 0;            /* 0 → mountain fully visible, 1 → fully black */
+      --treeOpacity: 0;     /* 0 → hidden, 1 → visible */
+
+      /* TWEAKS */
+      --heroVh: 220;        /* total scroll length for the hero (vh) */
+      --fadeStart: 0.05;    /* fade starts at 5% scroll progress */
+      --fadeEnd: 0.85;      /* fade ends at 85% scroll progress */
+      --treeStart: 0.45;    /* trees start appearing at 45% progress */
+      --treeEnd: 0.95;      /* trees fully visible at 95% progress */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Spacer section that creates scroll distance */
+    .heroScroll{
+      height: calc(var(--heroVh) * 1vh);
+      position: relative;
+      background: #000;
+    }
+
+    /* Sticky stage (what the user sees while scrolling through hero) */
+    .stage{
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* Mountain image layer */
+    .mountain{
+      position: absolute;
+      inset: 0;
+      background: url("Mountain Large.jpg") center top / cover no-repeat;
+      transform: scale(1.02); /* tiny scale to avoid edges on some screens */
+      filter: saturate(0.9) contrast(1.05);
+      will-change: opacity, filter;
+    }
+
+    /* Trees layer near the bottom to transition into the page */
+    .treesWrap{
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2vh; /* drop slightly below to hide any edge */
+      height: min(38vh, 420px);
+      pointer-events: none;
+      opacity: var(--treeOpacity);
+      will-change: opacity, transform;
+    }
+
+    .trees{
+      position: absolute;
+      inset: 0;
+      background: url("long tree.png") center bottom / cover no-repeat;
+      filter: contrast(1.15);
+      transform: translateY(calc((1 - var(--treeOpacity)) * 8vh));
+    }
+
+    /* Feather the top of the trees so they melt into black/mountain */
+    .treesMask{
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0) 22%,
+        rgba(0,0,0,0.35) 45%,
+        rgba(0,0,0,0.85) 78%,
+        rgba(0,0,0,1) 100%);
+      mix-blend-mode: multiply;
+      opacity: 0.9;
+    }
+
+    /* Black fade overlay (driven by --fade) */
+    .fadeToBlack{
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: var(--fade);
+      will-change: opacity;
+    }
+
+    /* Optional vignette for a darker, cinematic edge */
+    .vignette{
+      position: absolute;
+      inset: -2vh;
+      background: radial-gradient(ellipse at center,
+        rgba(0,0,0,0) 45%,
+        rgba(0,0,0,0.55) 80%,
+        rgba(0,0,0,0.95) 110%);
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    /* Content area below the hero */
+    .content{
+      position: relative;
+      z-index: 1;
+      background: #000;
+      padding: 72px 20px 140px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .kicker{
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    h1{
+      margin: 0 0 12px;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.05;
+    }
+
+    p{
+      margin: 0 0 16px;
+      color: rgba(255,255,255,0.78);
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .tip{
+      margin-top: 26px;
+      padding: 14px 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px;
+      color: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.04);
+    }
+
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HERO: scroll-driven fade -->
+  <section class="heroScroll" id="heroScroll">
+    <div class="stage" aria-hidden="true">
+      <div class="mountain"></div>
+
+      <div class="treesWrap">
+        <div class="trees"></div>
+        <div class="treesMask"></div>
+      </div>
+
+      <div class="fadeToBlack"></div>
+      <div class="vignette"></div>
+    </div>
+  </section>
+
+  <!-- CONTENT BELOW -->
+  <main class="content">
+    <div class="kicker">Demo</div>
+    <h1>Mountain → black fade with tree transition</h1>
+    <p>
+      Scroll down. The mountain fades into black, while the tree line eases in near the bottom
+      to blend the hero into the page.
+    </p>
+    <p>
+      Put your images beside this HTML file and keep the filenames:
+      <code>Mountain Large.jpg</code> and <code>long tree.png</code>.
+    </p>
+
+    <div class="tip">
+      Want it to fade sooner/later? Edit these CSS variables near the top:
+      <br><code>--fadeStart</code>, <code>--fadeEnd</code>, <code>--treeStart</code>, <code>--treeEnd</code>, <code>--heroVh</code>
+    </div>
+
+    <p style="margin-top:32px;">Placeholder content…</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer semper, risus sed posuere facilisis, massa urna rutrum nibh, sit amet vulputate justo dolor sit amet augue.</p>
+    <p>Morbi sed tortor vel justo luctus viverra. Suspendisse potenti. Donec dignissim, risus sed pellentesque faucibus, urna lectus pulvinar massa, et consectetur mi lorem a nibh.</p>
+    <p>Aliquam erat volutpat. Sed sit amet ligula quis ipsum luctus elementum. Praesent sit amet justo id libero finibus volutpat. Nulla facilisi.</p>
+  </main>
+
+  <script>
+    (function () {
+      const hero = document.getElementById("heroScroll");
+      const root = document.documentElement;
+
+      const clamp01 = (v) => Math.max(0, Math.min(1, v));
+      const remap = (v, a, b) => clamp01((v - a) / (b - a));
+
+      function readCSSVar(name, fallback){
+        const v = getComputedStyle(root).getPropertyValue(name).trim();
+        const n = Number(v);
+        return Number.isFinite(n) ? n : fallback;
+      }
+
+      let ticking = false;
+
+      function update() {
+        ticking = false;
+
+        const rect = hero.getBoundingClientRect();
+        const viewportH = window.innerHeight || 1;
+
+        // Progress through the hero section: 0 at top, 1 at bottom
+        const total = rect.height - viewportH;
+        const scrolled = -rect.top;
+        const raw = total > 0 ? (scrolled / total) : 0;
+        const progress = clamp01(raw);
+
+        const fadeStart = readCSSVar("--fadeStart", 0.05);
+        const fadeEnd   = readCSSVar("--fadeEnd",   0.85);
+        const treeStart = readCSSVar("--treeStart", 0.45);
+        const treeEnd   = readCSSVar("--treeEnd",   0.95);
+
+        const fade = remap(progress, fadeStart, fadeEnd);
+        const trees = remap(progress, treeStart, treeEnd);
+
+        root.style.setProperty("--fade", fade.toFixed(4));
+        root.style.setProperty("--treeOpacity", trees.toFixed(4));
+      }
+
+      function onScrollOrResize() {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      }
+
+      window.addEventListener("scroll", onScrollOrResize, { passive: true });
+      window.addEventListener("resize", onScrollOrResize);
+
+      // initial paint
+      update();
+    })();
+  </script>
+</body>
+</html>
